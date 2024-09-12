@@ -1,72 +1,73 @@
+%%writefile app.py
 import streamlit as st
 import pickle
 import pandas as pd
 import numpy as np
-from sklearn.cluster import DBSCAN
 from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
 
-# Load preprocessor, models, and label mapping
+# Load necessary models and label mappings
 with open('label_encoders.pkl', 'rb') as f:
     label_encoders = pickle.load(f)
 
 with open('scaler.pkl', 'rb') as f:
     scaler = pickle.load(f)
 
-with open('dbscan_model.pkl', 'rb') as f:
-    dbscan_model = pickle.load(f)
+with open('ms_model.pkl', 'rb') as f:
+    meanShiftModel = pickle.load(f)
 
-with open('dbscan_cluster_label.pkl', 'rb') as f:
-    dbscan_cluster_to_label_map = pickle.load(f)
+with open('ms_cluster_label.pkl', 'rb') as f:
+    ms_cluster_to_label_map = pickle.load(f)
 
 # Define label mapping function
 def get_labels(predicted_labels, label_map):
     return [label_map.get(label, 'Unknown') for label in predicted_labels]
 
-# Load the data DataFrame to compute min and max values
-data = pd.read_csv('path_to_your_data.csv')  # Adjust this path to where your data is stored
+# Read min and max values from CSV file
+min_max_df = pd.read_csv('min_max_values.csv', index_col='Column')
+min_max_values = min_max_df.to_dict(orient='index')
 
-# Compute min and max values for relevant columns
-min_max_values = {
-    'src_bytes': (data['src_bytes'].min(), data['src_bytes'].max()),
-    'dst_bytes': (data['dst_bytes'].min(), data['dst_bytes'].max()),
-    'wrong_fragment': (data['wrong_fragment'].min(), data['wrong_fragment'].max()),
-    'num_compromised': (data['num_compromised'].min(), data['num_compromised'].max()),
-    'count': (data['count'].min(), data['count'].max()),
-    'srv_count': (data['srv_count'].min(), data['srv_count'].max()),
-    'dst_host_srv_count': (data['dst_host_srv_count'].min(), data['dst_host_srv_count'].max())
-}
+# Feature lists
+integer_cols = ['src_bytes', 'dst_bytes', 'wrong_fragment', 'num_compromised', 'count', 'srv_count', 'dst_host_srv_count']
+nominal_cols = ['protocol_type', 'service', 'flag']
 
-# Important features for prediction
-nominal_cols = ['protocol_type', 'service', 'flag', 'attack_type']
-
-protocol_types = data['protocol_type'].unique().tolist()
-services = data['service'].unique().tolist()
-flags = data['flag'].unique().tolist()
-attack_types = data['attack_type'].unique().tolist()
+protocol_types = ['tcp', 'udp', 'icmp']
+services = ['http', 'smtp', 'finger', 'domain_u', 'auth', 'telnet', 'ftp', 'eco_i', 'ntp_u', 'ecr_i', 'other', 
+                'private', 'pop_3', 'ftp_data', 'rje', 'time', 'mtp', 'link', 'remote_job', 'gopher', 'ssh', 'name', 
+                'whois', 'domain', 'login', 'imap4', 'daytime', 'ctf', 'nntp', 'shell', 'IRC', 'nnsp', 'http_443', 'exec', 
+                'printer', 'efs', 'courier', 'uucp', 'klogin', 'kshell', 'echo', 'discard', 'systat', 'supdup', 'iso_tsap', 
+                'hostnames', 'csnet_ns', 'pop_2', 'sunrpc', 'uucp_path', 'netbios_ns', 'netbios_ssn', 'netbios_dgm', 
+                'sql_net', 'vmnet', 'bgp', 'Z39_50', 'ldap', 'netstat', 'urh_i', 'X11', 'urp_i', 'pm_dump', 'tftp_u', 
+                'tim_i', 'red_i']
+flags = ['SF', 'S1', 'REJ', 'S2', 'S0', 'S3', 'RSTO', 'RSTR', 'RSTOS0', 'OTH', 'SH']
 
 # Streamlit app layout
-st.title("Network Attack Prediction")
+st.title("Network Attack Clustering")
 
 # User input for the features
-st.subheader("Input the feature values")
+st.subheader(">>> Input the network features :")
 
-# Sliders with min and max values from the data DataFrame
-src_bytes = st.slider('Source Bytes', min_value=int(min_max_values['src_bytes'][0]), max_value=int(min_max_values['src_bytes'][1]), step=10)
-dst_bytes = st.slider('Destination Bytes', min_value=int(min_max_values['dst_bytes'][0]), max_value=int(min_max_values['dst_bytes'][1]), step=10)
-wrong_fragment = st.slider('Wrong Fragment', min_value=int(min_max_values['wrong_fragment'][0]), max_value=int(min_max_values['wrong_fragment'][1]), step=1)
-num_compromised = st.slider('Number of Compromised', min_value=int(min_max_values['num_compromised'][0]), max_value=int(min_max_values['num_compromised'][1]), step=1)
-count = st.slider('Count', min_value=int(min_max_values['count'][0]), max_value=int(min_max_values['count'][1]), step=1)
-srv_count = st.slider('Service Count', min_value=int(min_max_values['srv_count'][0]), max_value=int(min_max_values['srv_count'][1]), step=1)
-dst_host_srv_count = st.slider('Destination Host Service Count', min_value=int(min_max_values['dst_host_srv_count'][0]), max_value=int(min_max_values['dst_host_srv_count'][1]), step=1)
-
-# User input for nominal and binary features
 protocol_type = st.selectbox('Protocol Type', protocol_types)
-service = st.selectbox('Service', services)
-flag = st.selectbox('Flag', flags)
-attack_type = st.selectbox('Attack Type', attack_types)
+service = st.selectbox('Network Service', services)
+flag = st.selectbox('Flag (Status of the Connection', flags)
 
-logged_in = st.radio('Logged In', [0, 1])
-is_guest_login = st.radio('Is Guest Login', [0, 1])
+logged_in = st.radio(
+    'Successful Logged In ?',
+    options=[(f'Successful (1)', 1), (f'Otherwise (0)', 0)],
+    format_func=lambda x: x[0]
+)
+is_guest_login = st.radio(
+    'Login i a "guest" ? ',
+    options=[(f'Guest Login (1)', 1), (f'Otherwise (0)', 0)],
+    format_func=lambda x: x[0]
+)
+src_bytes = st.slider('Source Bytes', min_value=int(min_max_values['src_bytes']['Min']), max_value=int(min_max_values['src_bytes']['Max']), step=10)
+dst_bytes = st.slider('Destination Bytes', min_value=int(min_max_values['dst_bytes']['Min']), max_value=int(min_max_values['dst_bytes']['Max']), step=10)
+wrong_fragment = st.slider('Wrong Fragment', min_value=int(min_max_values['wrong_fragment']['Min']), max_value=int(min_max_values['wrong_fragment']['Max']), step=1)
+num_compromised = st.slider('Number of Compromised', min_value=int(min_max_values['num_compromised']['Min']), max_value=int(min_max_values['num_compromised']['Max']), step=1)
+count = st.slider('Count(Number of connections to the same host)', min_value=int(min_max_values['count']['Min']), max_value=int(min_max_values['count']['Max']), step=1)
+srv_count = st.slider('Service Count(Number of connections to the same service)', min_value=int(min_max_values['srv_count']['Min']), max_value=int(min_max_values['srv_count']['Max']), step=1)
+dst_host_srv_count = st.slider('Destination Host Service Count', min_value=int(min_max_values['dst_host_srv_count']['Min']), max_value=int(min_max_values['dst_host_srv_count']['Max']), step=1)
 
 # Prepare data for prediction
 data = {
@@ -81,12 +82,11 @@ data = {
     'is_guest_login': is_guest_login,
     'count': count,
     'srv_count': srv_count,
-    'dst_host_srv_count': dst_host_srv_count,
-    'attack_type': attack_type
+    'dst_host_srv_count': dst_host_srv_count
 }
 
-# Create a DataFrame with two duplicated rows
-df = pd.DataFrame([data, data])
+# Create a DataFrame with the input data
+df = pd.DataFrame([data])
 
 # Apply label encoding for nominal columns
 for col in nominal_cols:
@@ -94,21 +94,26 @@ for col in nominal_cols:
         df[col] = label_encoders[col].transform(df[col])
 
 # Apply log transformation to integer columns
-for col in min_max_values.keys():
-    if col in df.columns:
-        df[col] = np.log(df[col] + 1)
+for col in integer_cols:
+    df[col] = np.log(df[col] + 1)
 
 # Apply scaling to integer columns
-df[list(min_max_values.keys())] = scaler.transform(df[list(min_max_values.keys())])
+df[integer_cols] = scaler.transform(df[integer_cols])
 
-# Predict clusters using the DBSCAN model
-dbscan_predicted_labels = dbscan_model.fit_predict(df[list(min_max_values.keys())])
+# Duplicate the DataFrame to ensure PCA can be applied
+df_duplicated = pd.concat([df] * 2, ignore_index=True)
 
-# Map cluster labels to original labels
-dbscan_labels_in_string = get_labels(dbscan_predicted_labels, dbscan_cluster_to_label_map)
+# Perform PCA
+pca = PCA(n_components=min(2, df[integer_cols].shape[1]))  # Adjust the number of components
+df_pca = pca.fit_transform(df_duplicated[integer_cols])
 
+# Predict clusters using the MeanShift model
+ms_predicted_labels = meanShiftModel.predict(df_pca[:1])  # Predict only on the first sample
+print(ms_predicted_labels)
+ms_predicted_labels_str = get_labels(ms_predicted_labels, ms_cluster_to_label_map)
+print(ms_predicted_labels_str)
 # Display results
 if st.button('Predict'):
     # Convert list of labels to string and display only the first label
-    first_label = dbscan_labels_in_string[0]
-    st.write(f'Cluster Label: {first_label}')
+    first_label = ms_predicted_labels_str[0]
+    st.write(f'MeanShift Cluster Label: {first_label}')
