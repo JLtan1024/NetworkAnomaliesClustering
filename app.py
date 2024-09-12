@@ -102,4 +102,6 @@ dbscan_labels_in_string = get_labels(dbscan_predicted_labels, dbscan_cluster_to_
 
 # Display results
 if st.button('Predict'):
-    st.write(f'Cluster Labels: {dbscan_labels_in_string}')
+    # Convert list of labels to string and display only the first label
+    first_label = dbscan_labels_in_string[0]
+    st.write(f'Cluster Label: {first_label}')
