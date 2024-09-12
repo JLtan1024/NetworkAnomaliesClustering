@@ -1,0 +1,8 @@
+Column,Min,Max
+src_bytes,0,693375640
+dst_bytes,0,5155468
+wrong_fragment,0,3
+num_compromised,0,884
+count,0,511
+srv_count,0,511
+dst_host_srv_count,0,255
