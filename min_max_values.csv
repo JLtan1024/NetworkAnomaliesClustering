@@ -1,8 +1,9 @@
 Column,Min,Max
-src_bytes,0,693375640
-dst_bytes,0,5155468
-wrong_fragment,0,3
-num_compromised,0,884
-count,0,511
-srv_count,0,511
-dst_host_srv_count,0,255
+src_bytes,0.0,693375640.0
+dst_bytes,0.0,5155468.0
+wrong_fragment,0.0,3.0
+num_compromised,0.0,884.0
+count,0.0,511.0
+srv_count,0.0,511.0
+dst_host_srv_count,0.0,255.0
+dst_host_same_src_port_rate,0.0,1.0
