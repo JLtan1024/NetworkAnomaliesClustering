@@ -8,6 +8,7 @@ from sklearn.metrics.pairwise import euclidean_distances
 import matplotlib.pyplot as plt
 import seaborn as sns
 import base64
+import time
 
 # Load necessary models and label mappings
 with open('label_encoders.pkl', 'rb') as f:
@@ -192,7 +193,7 @@ if option == 'Single Data Input':
                                 background-size: contain;
                             }}
                             body {{
-                                background-color: #ADD8E6; /* Light Blue */
+                                background-color: #ADD8E6;
                             }}
                             </style>
                             """
@@ -245,6 +246,25 @@ if option == 'Single Data Input':
                 ax.set_title('PCA Projection of Training Data with New Data Point')
 
                 st.pyplot(fig)
+
+                time.sleep(18)
+
+                style = f"""
+                            <style>
+                            .stApp {{
+                                background: none;
+                                background-size: cover;
+                            }}
+                            body {{
+                                background-color: #FFFFFF;
+                            }}
+                            </style>
+                            """
+
+                st.markdown(
+                    style,
+                    unsafe_allow_html=True
+                )
 
         except Exception as e:
             st.error(f"An error occurred: {e}")
