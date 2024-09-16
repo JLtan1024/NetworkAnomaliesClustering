@@ -7,6 +7,7 @@ from sklearn.decomposition import PCA
 from sklearn.metrics.pairwise import euclidean_distances
 import matplotlib.pyplot as plt
 import seaborn as sns
+import base64
 
 # Load necessary models and label mappings
 with open('label_encoders.pkl', 'rb') as f:
@@ -67,6 +68,17 @@ def get_valid_input(prompt, min_val, max_val):
     except ValueError:
         st.error("Please enter a valid integer.")
         return None
+
+def autoplay_audio(file_path: str):
+    with open(file_path, "rb") as f:
+        data = f.read()
+        b64 = base64.b64encode(data).decode()
+        md = f"""
+            <audio id="themeAudio" autoplay="true" style="display:none;">
+            <source src="data:audio/mp3;base64,{b64}" type="audio/mp3">
+            </audio>
+            """
+        st.markdown(md, unsafe_allow_html=True)
 
 # Streamlit app layout
 st.title("Network Attack Clustering")
@@ -154,20 +166,62 @@ if option == 'Single Data Input':
                 st.write("Columns with missing values:")
                 st.write(missing_data[missing_data > 0])
             else:
-                # Calculate distances between the new data points and all training points
                 distances = euclidean_distances(df_pca, X_train_pca)
 
-                # Find the nearest training point for each new data point
                 nearest_train_idx = np.argmin(distances, axis=1)
 
-                # Assign the cluster label of the nearest training point to the new data point
                 agglo_test_predicted_labels = aggloModel.labels_[nearest_train_idx]
 
-                # Convert cluster labels to their corresponding string labels
                 aggloPredictedTestStr = [agglo_cluster_to_label_map[cluster] for cluster in agglo_test_predicted_labels]
 
-                st.write(f'Predicted cluster label: {agglo_test_predicted_labels}')
-                st.write(f'Predicted cluster label string: {aggloPredictedTestStr[0]}')
+                predicted_label = aggloPredictedTestStr[0]
+
+                main_bg = "bg.jpg"
+                main_bg_ext = "jpg"
+
+                if "neptune." in predicted_label.lower():
+                    autoplay_audio("imperial_march.mp3")
+                    highlighted_label = f'<span style="color:red; font-size:24px;">{predicted_label}</span>'
+                    with open(main_bg, "rb") as f:
+                        data = f.read()
+                        b64 = base64.b64encode(data).decode()
+                        style = f"""
+                            <style>
+                            .stApp {{
+                                background: url(data:image/jpg;base64,{b64});
+                                background-size: contain;
+                            }}
+                            body {{
+                                background-color: #ADD8E6; /* Light Blue */
+                            }}
+                            </style>
+                            """
+                else:
+                    highlighted_label = predicted_label
+                    style = f"""
+                            <style>
+                            .stApp {{
+                                background: none;
+                                background-size: cover;
+                            }}
+                            body {{
+                                background-color: #FFFFFF;
+                            }}
+                            </style>
+                            """
+                st.markdown(
+                    style,
+                    unsafe_allow_html=True
+                )
+
+                st.markdown(
+                    f'Predicted cluster label: {agglo_test_predicted_labels}',
+                    unsafe_allow_html=True
+                )
+                st.markdown(
+                    f'Predicted cluster label string: {highlighted_label}',
+                    unsafe_allow_html=True
+                )
 
                 train_cluster_labels_str = [agglo_cluster_to_label_map[cluster] for cluster in aggloModel.labels_]
 
