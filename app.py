@@ -255,7 +255,7 @@ if option == 'Single Data Input':
 
                 st.pyplot(fig)
 
-                time.sleep(14)
+                time.sleep(18)
 
                 style = f"""
                             <style>
