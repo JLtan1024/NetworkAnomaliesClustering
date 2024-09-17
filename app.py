@@ -81,6 +81,17 @@ def autoplay_audio(file_path: str):
             """
         st.markdown(md, unsafe_allow_html=True)
 
+def autoplay_audio2(file_path: str):
+    with open(file_path, "rb") as f:
+        data = f.read()
+        b64 = base64.b64encode(data).decode()
+        md = f"""
+            <audio id="themeAudio" autoplay="true" style="display:none;">
+            <source src="data:audio/mp3;base64,{b64}" type="audio/mp3">
+            </audio>
+            """
+        st.markdown(md, unsafe_allow_html=True)
+
 # Streamlit app layout
 st.title("Network Attack Clustering")
 
@@ -181,7 +192,9 @@ if option == 'Single Data Input':
                 main_bg_ext = "jpg"
 
                 if "neptune." in predicted_label.lower():
-                    autoplay_audio("imperial_march.mp3")
+                    autoplay_audio("steinsgateshort.mp3")
+                    autoplay_audio("kiraslaugh.mp3")
+                    time.sleep(1)
                     highlighted_label = f'<span style="color:red; font-size:24px;">{predicted_label}</span>'
                     with open(main_bg, "rb") as f:
                         data = f.read()
@@ -191,6 +204,9 @@ if option == 'Single Data Input':
                             .stApp {{
                                 background: url(data:image/jpg;base64,{b64});
                                 background-size: contain;
+                            }}
+                            .css-15tx938, .stMarkdown, .css-10trblm, .st-bz, .css-1dx1gwv {{
+                                color: white;
                             }}
                             body {{
                                 background-color: #ADD8E6;
@@ -204,6 +220,9 @@ if option == 'Single Data Input':
                             .stApp {{
                                 background: none;
                                 background-size: cover;
+                            }}
+                            .css-15tx938, .stMarkdown, .css-10trblm, .st-bz, .css-1dx1gwv{{
+                                color: black;
                             }}
                             body {{
                                 background-color: #FFFFFF;
@@ -247,13 +266,16 @@ if option == 'Single Data Input':
 
                 st.pyplot(fig)
 
-                time.sleep(18)
+                time.sleep(14)
 
                 style = f"""
                             <style>
                             .stApp {{
                                 background: none;
                                 background-size: cover;
+                            }}
+                            .css-15tx938, .stMarkdown, .css-10trblm, .st-bz, .css-1dx1gwv{{
+                                color: black;
                             }}
                             body {{
                                 background-color: #FFFFFF;
@@ -285,7 +307,6 @@ elif option == 'CSV File Upload':
         if not required_columns.issubset(df.columns):
             st.error(f"The uploaded file must contain the following columns: {', '.join(required_columns)}")
         else:
-            # Process data
             df_copy = df.copy()
 
             # Apply label encoding to nominal columns
@@ -319,8 +340,33 @@ elif option == 'CSV File Upload':
                     df_copy['Predicted Cluster Label'] = agglo_test_predicted_labels
                     df_copy['Predicted Cluster Label String'] = aggloPredictedTestStr
 
+                    attack_count = (df_copy['Predicted Cluster Label String'].str.contains('neptune.', case=False)).sum()
+                    total_rows = len(df_copy)
+
                     st.write("Predicted Clusters:")
                     st.write(df_copy)
+
+                    st.write(f"Detected {attack_count} attacks out of {total_rows} rows ({(attack_count / total_rows) * 100:.2f}% of the data).")
+
+                    if attack_count > 0:
+                        autoplay_audio("conan.mp3")
+                        time.sleep(1)
+                        st.markdown("""
+                            <style>
+                            .stApp {
+                                background-color: #FFB6C1;
+                                animation: blink 2s linear infinite;
+                            }
+                            @keyframes blink {
+                                50% { background-color: #FF0000; }
+                            }
+                            </style>
+                            """, unsafe_allow_html=True)
+                        st.markdown("""
+                                    <div style="font-size:30px; color:red;">
+                                        ⚠️ <strong>ALERT: Potential attacks detected in the dataset!</strong>
+                                    </div>
+                                    """, unsafe_allow_html=True)
 
                     train_cluster_labels_str = get_labels(aggloModel.labels_, agglo_cluster_to_label_map)
 
