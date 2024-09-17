@@ -205,7 +205,7 @@ if option == 'Single Data Input':
                                 background: url(data:image/jpg;base64,{b64});
                                 background-size: contain;
                             }}
-                            .css-15tx938,h1, [data-testid="stMarkdownContainer"], .st-emotion-cache-jkfxgf .stMarkdown, .css-10trblm, .st-bz, .css-1dx1gwv{{
+                            .css-15tx938,h1,h3, [data-testid="stMarkdownContainer"], .st-emotion-cache-jkfxgf .stMarkdown, .css-10trblm, .st-bz, .css-1dx1gwv{{
                                 color: white;
                             }}
                             body {{
@@ -221,7 +221,7 @@ if option == 'Single Data Input':
                                 background: none;
                                 background-size: cover;
                             }}
-                            .css-15tx938,h1, [data-testid="stMarkdownContainer"], .st-emotion-cache-jkfxgf .stMarkdown, .css-10trblm, .st-bz, .css-1dx1gwv{{
+                            .css-15tx938,h1,h3, [data-testid="stMarkdownContainer"], .st-emotion-cache-jkfxgf .stMarkdown, .css-10trblm, .st-bz, .css-1dx1gwv{{
                                 color: black;
                             }}
                             body {{
@@ -274,7 +274,7 @@ if option == 'Single Data Input':
                                 background: none;
                                 background-size: cover;
                             }}
-                            .css-15tx938,h1, [data-testid="stMarkdownContainer"], .st-emotion-cache-jkfxgf .stMarkdown, .css-10trblm, .st-bz, .css-1dx1gwv{{
+                            .css-15tx938,h1,h3 [data-testid="stMarkdownContainer"], .st-emotion-cache-jkfxgf .stMarkdown, .css-10trblm, .st-bz, .css-1dx1gwv{{
                                 color: black;
                             }}
                             body {{
