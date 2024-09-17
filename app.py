@@ -81,17 +81,6 @@ def autoplay_audio(file_path: str):
             """
         st.markdown(md, unsafe_allow_html=True)
 
-def autoplay_audio2(file_path: str):
-    with open(file_path, "rb") as f:
-        data = f.read()
-        b64 = base64.b64encode(data).decode()
-        md = f"""
-            <audio id="themeAudio" autoplay="true" style="display:none;">
-            <source src="data:audio/mp3;base64,{b64}" type="audio/mp3">
-            </audio>
-            """
-        st.markdown(md, unsafe_allow_html=True)
-
 # Streamlit app layout
 st.title("Network Attack Clustering")
 
@@ -192,8 +181,8 @@ if option == 'Single Data Input':
                 main_bg_ext = "jpg"
 
                 if "neptune." in predicted_label.lower():
-                    autoplay_audio("steinsgateshort.mp3")
-                    autoplay_audio("kiraslaugh.mp3")
+                    autoplay_audio("imperial_march.mp3")
+                    #autoplay_audio("kiraslaugh.mp3")
                     time.sleep(1)
                     highlighted_label = f'<span style="color:red; font-size:24px;">{predicted_label}</span>'
                     with open(main_bg, "rb") as f:
