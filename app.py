@@ -221,7 +221,7 @@ if option == 'Single Data Input':
                                 background: none;
                                 background-size: cover;
                             }}
-                            .css-15tx938, .stMarkdown, .css-10trblm, .st-bz, .css-1dx1gwv{{
+                            .css-15tx938, [data-testid="stMarkdownContainer"], .stMarkdown, .css-10trblm, .st-bz, .css-1dx1gwv{{
                                 color: black;
                             }}
                             body {{
