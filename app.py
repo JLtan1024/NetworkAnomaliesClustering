@@ -274,7 +274,7 @@ if option == 'Single Data Input':
                                 background: none;
                                 background-size: cover;
                             }}
-                            .css-15tx938,h1,h3 [data-testid="stMarkdownContainer"], .st-emotion-cache-jkfxgf .stMarkdown, .css-10trblm, .st-bz, .css-1dx1gwv{{
+                            .css-15tx938,h1,h3, [data-testid="stMarkdownContainer"], .st-emotion-cache-jkfxgf .stMarkdown, .css-10trblm, .st-bz, .css-1dx1gwv{{
                                 color: black;
                             }}
                             body {{
