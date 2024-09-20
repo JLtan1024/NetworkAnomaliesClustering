@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import base64
 import time
+import hdbscan
 
 # Load necessary models and label mappings
 with open('label_encoders.pkl', 'rb') as f:
