@@ -1,4 +1,4 @@
-%%writefile update_app.py
+
 import streamlit as st
 import pickle
 import plotly.express as px
