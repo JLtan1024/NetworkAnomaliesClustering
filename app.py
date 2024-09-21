@@ -391,8 +391,6 @@ if page == "Prediction":
     
 
 elif page == "Dashboard":
-  
-
     # Function to load the saved clustering model from the pickle file
     def load_model(path):
         with open(path, 'rb') as file:
@@ -416,7 +414,7 @@ elif page == "Dashboard":
 
     # Add a select box for users to choose a clustering model
     model_choice = st.selectbox("Select the clustering model:", 
-                                 ["DBSCAN", "HDBSCAN", "Agglomerative", "Mean Shift"])
+                                 ["DBSCAN", "HDBSCAN", "Agglomerative", "Mean Shift","Ensemble"])
     
     # Model and label map paths based on selection
     if model_choice == "DBSCAN":
@@ -431,9 +429,12 @@ elif page == "Dashboard":
     elif model_choice == "Mean Shift":
         model_path = 'ms_model.pkl'
         cluster_label_map_path = 'ms_cluster_label.pkl'
+    elif model_choice == "Ensemble":
+        cluster_label_map_path = 'consensus_map.pkl'
     
     # Load the selected clustering model and cluster label map
-    clustering_model = load_model(model_path)
+    if model_choice != "Ensemble":
+        clustering_model = load_model(model_path)
     cluster_label_map = load_cluster_label_map(cluster_label_map_path)
 
     # Assuming you have PCA-transformed data saved or can be loaded again
@@ -442,10 +443,15 @@ elif page == "Dashboard":
 
     # Predict cluster labels using the selected clustering model
     try:
-        if model_choice in ["Mean Shift"]:
-            predicted_labels = clustering_model.predict(X_pca)  # Use fit_predict for these models
+        if model_choice == "Ensemble":
+            # Load consensus labels directly
+            with open('consensus_labels.pkl', 'rb') as f:
+                predicted_labels = pickle.load(f)
         else:
-            predicted_labels = clustering_model.fit_predict(X_pca)  # Use fit_predict for other models too
+            if model_choice in ["Mean Shift"]:
+                predicted_labels = clustering_model.predict(X_pca)  # Use fit_predict for these models
+            else:
+                predicted_labels = clustering_model.fit_predict(X_pca)  # Use fit_predict for other models too
     except Exception as e:
         st.error(f"An error occurred while predicting: {e}")
         st.stop()
