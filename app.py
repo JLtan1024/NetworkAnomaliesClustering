@@ -188,7 +188,7 @@ if page == "Prediction":
                     main_bg_ext = "jpg"
 
                     if "neptune." in predicted_label.lower():
-                        autoplay_audio("imperial_march.mp3")
+                        autoplay_audio("imperial_march10.mp3")
                         #autoplay_audio("kiraslaugh.mp3")
                         time.sleep(1)
                         highlighted_label = f'<span style="color:red; font-size:24px;">{predicted_label}</span>'
@@ -262,7 +262,7 @@ if page == "Prediction":
     
                     st.pyplot(fig)
     
-                    time.sleep(18)
+                    time.sleep(10)
     
                     style = f"""
                                 <style>
